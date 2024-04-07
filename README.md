@@ -21,8 +21,6 @@
 
 \- Removed unfinished modules/settings
 
-\- DoubleSlider max values dont save/load properly
-
 ## TODO
 \- AutoClicker crashes on low settings / game unfocused for too long
 
