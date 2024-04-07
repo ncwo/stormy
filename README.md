@@ -9,11 +9,15 @@
 
 \+ Fixed AimAssist FOV checks
 
-\+ Fixed issue where AimAssist speeds weren't consistant
+\+ Fixed issue where AimAssist speeds werent consistent
+
+\+ Fixed Backtrack useReach
 
 = Made AimAssist sort by FOV
 
 = Moved configs to .weave/stormy
+
+= Added Venom theme, removed Orange+Gold+PastelPink, renamed Sassan -> Coral
 
 = Changed default config values
 
@@ -22,6 +26,7 @@
 \- Removed unfinished modules/settings
 
 ## TODO
+(as in never)
 \- AutoClicker crashes on low settings / game unfocused for too long
 
 \- AutoClicker CPS setting is innacurate, offset by ~+6 in game
