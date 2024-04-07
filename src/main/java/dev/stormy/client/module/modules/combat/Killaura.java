@@ -6,6 +6,7 @@ import org.lwjgl.input.Mouse;
 
 import dev.stormy.client.clickgui.Theme;
 import dev.stormy.client.module.Module;
+import dev.stormy.client.module.modules.player.Blink;
 import dev.stormy.client.module.setting.impl.DescriptionSetting;
 import dev.stormy.client.module.setting.impl.SliderSetting;
 import dev.stormy.client.module.setting.impl.TickSetting;
@@ -54,7 +55,7 @@ public class Killaura extends Module {
 	@SubscribeEvent
 	public void setTarget(TickEvent.Pre e) {
 		if (PlayerUtils.isPlayerInGame()) {
-			target = mc.theWorld != null ? mc.theWorld.playerEntities.stream().filter(player -> player.getEntityId() != mc.thePlayer.getEntityId() && player.getDistanceToEntity(mc.thePlayer) <= range.getInput()).findFirst() : Optional.empty();
+			target = mc.theWorld != null ? mc.theWorld.playerEntities.stream().filter(player -> player.getEntityId() != mc.thePlayer.getEntityId() && (Blink.fakePlayer == null || player.getEntityId() != Blink.fakePlayer.getEntityId()) && player.getDistanceToEntity(mc.thePlayer) <= range.getInput()).findFirst() : Optional.empty();
 		}
 	}
 
