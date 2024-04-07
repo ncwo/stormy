@@ -24,6 +24,8 @@
 \- DoubleSlider max values dont save/load properly
 
 ## TODO
+\- AutoClicker crashes on low settings / game unfocused for too long
+
 \- AutoClicker CPS setting is innacurate, offset by ~+6 in game
 
 \- Reach does not work with AutoClicker
