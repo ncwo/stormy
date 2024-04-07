@@ -1,12 +1,11 @@
-# Stormy
-- Based on an early build of https://github.com/syz66/illusion (Which is based on raven). (DELISTED)
-- ClickGUI key is ENTER.
-- Made for [Weave](https://github.com/Weave-MC).
-## Goal
-- My goal with this project is to make my own custom client using Raven as a base without worrying about skidding too much. 
-- I want this client to be a hybrid client, but mainly blatant.
-## Modules + CGUI
-Key:
-- ❌ = incomplete/unsatisfactory
-- ✅ = implemented and functional
-![image](https://github.com/Tryflle/stormy/assets/111710533/cb976d38-db45-4f2a-a050-8bc19c9267ee)
+# Changes
+- Added Inventory Click to AutoClicker
+- Aded AccurateCps (https://github.com/Syz66/AccurateCPS/releases/tag/1.0)
+- Added SumoFences (and fixed height on Fort Royale)
+- Fixed AimAssist FOV checks
+- Fixed issue where AimAssist speeds weren't consistant
+- Made AimAssist sort by FOV
+- Moved configs to .weave/stormy
+- Changed default config values
+- Change max values (Reach: 6 -> 4, Velocity 200 -> 100), as well as increment values (Reach 0.1 -> 0.01)
+- Removed unfinished modules/settings

@@ -1,116 +1,185 @@
 package dev.stormy.client.module.modules.combat;
 
+import java.lang.reflect.Method;
+
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+
 import dev.stormy.client.module.Module;
 import dev.stormy.client.module.setting.impl.DescriptionSetting;
 import dev.stormy.client.module.setting.impl.SliderSetting;
 import dev.stormy.client.module.setting.impl.TickSetting;
 import dev.stormy.client.utils.Utils;
-import dev.stormy.client.utils.asm.HookUtils;
 import dev.stormy.client.utils.math.TimerUtils;
 import dev.stormy.client.utils.player.PlayerUtils;
-import net.minecraft.block.BlockLiquid;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
-import net.weavemc.loader.api.event.*;
-import org.lwjgl.input.Mouse;
 import net.minecraft.util.MovingObjectPosition;
+import net.weavemc.loader.api.event.Event;
+import net.weavemc.loader.api.event.EventBus;
+import net.weavemc.loader.api.event.MouseEvent;
+import net.weavemc.loader.api.event.RenderHandEvent;
+import net.weavemc.loader.api.event.SubscribeEvent;
 
-
-@SuppressWarnings("unused")
 public class AutoClicker extends Module {
-    public static TickSetting breakBlocks, hitSelect;
-    public static SliderSetting leftCPS;
-    public boolean shouldClick, breakHeld = false;
-    TimerUtils t = new TimerUtils();
-    long lastClickTime = 0;
-    int lmb = mc.gameSettings.keyBindAttack.getKeyCode();
-    int delay = 0;
+	public static TickSetting breakBlocks;
 
-    public boolean delaying = false;
+	public static TickSetting hitSelect;
 
-    public AutoClicker() {
-        super("AutoClicker", ModuleCategory.Combat, 0);
-        this.registerSetting(new DescriptionSetting("Click automatically"));
-        this.registerSetting(leftCPS = new SliderSetting("CPS", 10.0D, 1.0D, 20.0D, 1.0D));
-        this.registerSetting(breakBlocks = new TickSetting("Break blocks", false));
-        this.registerSetting(hitSelect = new TickSetting("Hit Select", false));
-    }
+	public static TickSetting inventoryFill;
 
-    public boolean breakBlock() {
-        if (breakBlocks.isToggled() && mc.objectMouseOver != null) {
-            BlockPos p = mc.objectMouseOver.getBlockPos();
+	public static SliderSetting leftCPS;
 
-            if (p != null) {
-                if (mc.theWorld.getBlockState(p).getBlock() != Blocks.air && !(mc.theWorld.getBlockState(p).getBlock() instanceof BlockLiquid)) {
-                    if (!breakHeld) {
-                        int e = mc.gameSettings.keyBindAttack.getKeyCode();
-                        KeyBinding.setKeyBindState(e, true);
-                        KeyBinding.onTick(e);
-                        breakHeld = true;
-                    }
-                    return true;
-                }
-                if (breakHeld) {
-                    breakHeld = false;
-                }
-            }
-        }
-        return false;
-    }
+	public boolean shouldClick;
 
-    public boolean hitSelectLogic() {
-        if (!hitSelect.isToggled()) return false;
-        MovingObjectPosition result = mc.objectMouseOver;
-        if (result != null && result.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY && result.entityHit instanceof EntityPlayer targetPlayer) {
-            return hitSelect.isToggled() && PlayerUtils.lookingAtPlayer(mc.thePlayer, targetPlayer, 4);
-        }
-        return false;
-    }
-    @SubscribeEvent
-    public void onRender(RenderHandEvent e) {
-        randomizer();
-        if (PlayerUtils.isPlayerInGame() && Mouse.isButtonDown(0) && shouldClick && mc.currentScreen == null) {
-            if (hitSelect.isToggled() && !hitSelectLogic()) return;
-            if (breakBlock()) return;
-            long currentTime = System.currentTimeMillis();
-            if (t.hasReached(Utils.Java.randomInt(5000, 10000))) {
-                delay = (1000 / (int) (leftCPS.getInput() + (Utils.Java.randomInt(-4, 0))));
-                t.reset();
-            } else delay = (1000 / (int) (leftCPS.getInput() + (Utils.Java.randomInt(-3, 3))));
-            if (delay < 0) delay = (1000 / (int) (leftCPS.getInput() + (Utils.Java.randomInt(0, 3))));
-            //don't turn it too low or else you'll crash because im the best developer of the century
-            if (currentTime - lastClickTime >= delay && !delaying) {
-                lastClickTime = currentTime;
-                KeyBinding.setKeyBindState(lmb, true);
-                KeyBinding.onTick(lmb);
-                HookUtils.setMouseButtonState(0, true);
-                delaying = true;
-            }
-            if (delaying) {
-                finishDelay();
-            }
+	public boolean breakHeld = false;
 
-        }
-    }
+	private final Method playerMouseInput;
 
-    public void randomizer() {
-        double random = Utils.Java.randomInt(0, 4);
-         shouldClick = random >= 0.5;
-    }
-    public void finishDelay() {
-        long currentTime = System.currentTimeMillis();
-        int newdelay = Utils.Java.randomInt(30, 120);
+	TimerUtils t = new TimerUtils();
 
-        if (currentTime - lastClickTime >= newdelay) {
-            lastClickTime = currentTime;
-            KeyBinding.setKeyBindState(lmb, false);
-            KeyBinding.onTick(lmb);
-            EventBus.callEvent(new MouseEvent());
-            HookUtils.setMouseButtonState(0, false);
-            delaying = false;
-            shouldClick = false;
-        }
-    }
+	long lastClickTime = 0L;
+
+	int lmb = mc.gameSettings.keyBindAttack.getKeyCode();
+
+	int delay = 0;
+
+	public boolean delaying = false;
+
+	public AutoClicker() {
+		super("AutoClicker", Module.ModuleCategory.Combat, 0);
+		registerSetting(new DescriptionSetting("Click automatically"));
+		registerSetting(leftCPS = new SliderSetting("CPS", 10.0D, 1.0D, 20.0D, 1.0D));
+		registerSetting(breakBlocks = new TickSetting("Break blocks", true));
+		registerSetting(hitSelect = new TickSetting("Hit Select", false));
+		registerSetting(inventoryFill = new TickSetting("Inventory Fill", true));
+		try {
+			this.playerMouseInput = GuiScreen.class.getMethod("mouseClicked", new Class[] { int.class, int.class, int.class });
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+		if (this.playerMouseInput != null) {
+			this.playerMouseInput.setAccessible(true);
+		}
+	}
+
+	public boolean breakBlock() {
+		if (breakBlocks.isToggled() && mc.objectMouseOver != null) {
+			BlockPos p = mc.objectMouseOver.getBlockPos();
+			if (p != null) {
+				if (mc.theWorld.getBlockState(p).getBlock() != Blocks.air && !(mc.theWorld.getBlockState(p).getBlock() instanceof net.minecraft.block.BlockLiquid)) {
+					if (!this.breakHeld) {
+						int e = mc.gameSettings.keyBindAttack.getKeyCode();
+						KeyBinding.setKeyBindState(e, true);
+						KeyBinding.onTick(e);
+						this.breakHeld = true;
+					}
+					return true;
+				}
+				if (this.breakHeld) {
+					this.breakHeld = false;
+				}
+			}
+		}
+		return false;
+	}
+
+	public boolean hitSelectLogic() {
+		if (!hitSelect.isToggled()) {
+			return false;
+		}
+		MovingObjectPosition result = mc.objectMouseOver;
+		if (result != null && result.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY) {
+			Entity entity = result.entityHit;
+			if (entity instanceof EntityPlayer) {
+				EntityPlayer targetPlayer = (EntityPlayer) entity;
+				return (hitSelect.isToggled() && PlayerUtils.lookingAtPlayer(mc.thePlayer, targetPlayer, 4.0D));
+			}
+		}
+		return false;
+	}
+
+	@SubscribeEvent
+	public void onRender(RenderHandEvent e) {
+		randomizer();
+		if (inventoryFill.isToggled() && (mc.currentScreen != null || !mc.inGameHasFocus)) {
+			doInvClick();
+			return;
+		}
+		if (PlayerUtils.isPlayerInGame() && Mouse.isButtonDown(0) && this.shouldClick && mc.currentScreen == null) {
+			if ((hitSelect.isToggled() && !hitSelectLogic()) || breakBlock()) {
+				return;
+			}
+			long currentTime = System.currentTimeMillis();
+			if (this.t.hasReached(Utils.Java.randomInt(5000.0D, 10000.0D))) {
+				this.delay = 1000 / (int) (leftCPS.getInput() + Utils.Java.randomInt(-4.0D, 0.0D));
+				this.t.reset();
+			} else {
+				this.delay = 1000 / (int) (leftCPS.getInput() + Utils.Java.randomInt(-3.0D, 3.0D));
+			}
+			if (this.delay < 0) {
+				this.delay = 1000 / (int) (leftCPS.getInput() + Utils.Java.randomInt(0.0D, 3.0D));
+			}
+			if (currentTime - this.lastClickTime >= this.delay && !this.delaying) {
+				this.lastClickTime = currentTime;
+				KeyBinding.setKeyBindState(this.lmb, true);
+				KeyBinding.onTick(this.lmb);
+				this.delaying = true;
+			}
+			if (this.delaying) {
+				finishDelay();
+			}
+		}
+	}
+
+	public void randomizer() {
+		double random = Utils.Java.randomInt(0.0D, 4.0D);
+		this.shouldClick = (random >= 0.5D);
+	}
+
+	public void finishDelay() {
+		long currentTime = System.currentTimeMillis();
+		int newdelay = Utils.Java.randomInt(30.0D, 120.0D);
+		if (currentTime - this.lastClickTime >= newdelay) {
+			this.lastClickTime = currentTime;
+			KeyBinding.setKeyBindState(this.lmb, false);
+			KeyBinding.onTick(this.lmb);
+			EventBus.callEvent((Event) new MouseEvent());
+			this.delaying = false;
+			this.shouldClick = false;
+		}
+	}
+
+	public void doInvClick() {
+		if ((mc.currentScreen instanceof net.minecraft.client.gui.inventory.GuiInventory || mc.currentScreen instanceof net.minecraft.client.gui.inventory.GuiChest) && (Keyboard.isKeyDown(54) || Keyboard.isKeyDown(42)) && Mouse.isButtonDown(0) && this.shouldClick) {
+			long currentTime = System.currentTimeMillis();
+			if (this.t.hasReached(Utils.Java.randomInt(5000.0D, 10000.0D))) {
+				this.delay = 1000 / (int) (leftCPS.getInput() + Utils.Java.randomInt(-4.0D, 0.0D));
+				this.t.reset();
+			} else {
+				this.delay = 1000 / (int) (leftCPS.getInput() + Utils.Java.randomInt(-3.0D, 3.0D));
+			}
+			if (this.delay < 0) {
+				this.delay = 1000 / (int) (leftCPS.getInput() + Utils.Java.randomInt(0.0D, 3.0D));
+			}
+			if (currentTime - this.lastClickTime >= this.delay && !this.delaying) {
+				this.lastClickTime = currentTime;
+				try {
+					GuiScreen guiScreen = mc.currentScreen;
+					this.playerMouseInput.invoke(guiScreen, new Object[] { Integer.valueOf(Mouse.getX() * guiScreen.width / mc.displayWidth), Integer.valueOf(guiScreen.height - Mouse.getY() * guiScreen.height / mc.displayHeight - 1), Integer.valueOf(0) });
+				} catch (IllegalAccessException | java.lang.reflect.InvocationTargetException illegalAccessException) {
+				}
+				this.delaying = true;
+			}
+			if (this.delaying && currentTime - this.lastClickTime >= Utils.Java.randomInt(30.0D, 120.0D)) {
+				this.lastClickTime = currentTime;
+				this.delaying = false;
+				this.shouldClick = false;
+			}
+		}
+	}
 }
