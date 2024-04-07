@@ -12,6 +12,7 @@ import dev.stormy.client.utils.packet.TimedPacket;
 import dev.stormy.client.utils.player.PlayerUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.Packet;
+
 import net.weavemc.loader.api.event.PacketEvent;
 import net.weavemc.loader.api.event.RenderHandEvent;
 import net.weavemc.loader.api.event.SubscribeEvent;
@@ -34,43 +35,34 @@ public class Backtrack extends Module {
 
 	@SubscribeEvent
 	public void setTarget(TickEvent.Pre e) {
-		if (PlayerUtils.isPlayerInGame()) {
-			target = mc.theWorld != null ? mc.theWorld.playerEntities.stream().filter(player -> player.getEntityId() != mc.thePlayer.getEntityId() && player.getDistanceToEntity(mc.thePlayer) <= range.getInput()).findFirst() : Optional.empty();
-		}
+		if (!PlayerUtils.isPlayerInGame() || !useRange.isToggled()) return;
+		target = mc.theWorld != null ? mc.theWorld.playerEntities.stream().filter(player -> player.getEntityId() != mc.thePlayer.getEntityId() && player.getDistanceToEntity(mc.thePlayer) <= range.getInput()).findFirst() : Optional.empty();
 	}
 
 	@SubscribeEvent
 	public void onTickDisabler(TickEvent e) {
-		if (!PlayerUtils.isPlayerInGame()) {
-			this.disable();
-		}
+		if (PlayerUtils.isPlayerInGame()) return;
+		this.disable();
 	}
 
 	public int getSpoofMS() {
-		if (target.isPresent()) {
-			return (int) spoofms.getInput();
-		} else {
-			return 0;
-		}
+		return (!useRange.isToggled() || target.isPresent()) ? (int) spoofms.getInput() : 0;
 	}
 
 	@SubscribeEvent
 	public void pingSpooferIncoming(PacketEvent.Receive e) {
-		if (PlayerUtils.isPlayerInGame() && target.isPresent()) {
-			try {
-				Packet<?> packet = e.getPacket();
-				incomingPackets.add(new TimedPacket(packet, System.currentTimeMillis()));
-				e.setCancelled(true);
-			} catch (Exception ignored) {
-			}
+		if (!PlayerUtils.isPlayerInGame() || (useRange.isToggled() && !target.isPresent())) return;
+		try {
+			Packet<?> packet = e.getPacket();
+			incomingPackets.add(new TimedPacket(packet, System.currentTimeMillis()));
+			e.setCancelled(true);
+		} catch (Exception ignored) {
 		}
 	}
 
 	@SubscribeEvent
 	public void packetHandler(RenderHandEvent e) {
-		if (!PlayerUtils.isPlayerInGame()) {
-			return;
-		}
+		if (!PlayerUtils.isPlayerInGame()) return;
 		final long time = System.currentTimeMillis();
 		incomingPackets.removeIf(timedPacket -> {
 			try {
@@ -92,14 +84,13 @@ public class Backtrack extends Module {
 
 	@Override
 	public void onDisable() {
-		if (PlayerUtils.isPlayerInGame()) {
-			try {
-				incomingPackets.removeIf(timedPacket -> {
-					PacketUtils.handle(timedPacket.packet(), false);
-					return true;
-				});
-			} catch (Exception ignored) {
-			}
+		if (!PlayerUtils.isPlayerInGame()) return;
+		try {
+			incomingPackets.removeIf(timedPacket -> {
+				PacketUtils.handle(timedPacket.packet(), false);
+				return true;
+			});
+		} catch (Exception ignored) {
 		}
 		incomingPackets.clear();
 	}

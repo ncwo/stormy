@@ -15,7 +15,7 @@ public class ClickGuiModule extends Module {
 
 	public ClickGuiModule() {
 		super("ClickGui", Module.ModuleCategory.Client, 28);
-		this.registerSetting(clientTheme = new ComboSetting<>("Theme", Colors.Amethyst));
+		this.registerSetting(clientTheme = new ComboSetting<>("Theme", Colors.Tryfle));
 	}
 
 	private final KeyBinding[] moveKeys = new KeyBinding[] { mc.gameSettings.keyBindForward, mc.gameSettings.keyBindBack, mc.gameSettings.keyBindRight, mc.gameSettings.keyBindLeft, mc.gameSettings.keyBindJump, mc.gameSettings.keyBindSprint };
@@ -42,6 +42,6 @@ public class ClickGuiModule extends Module {
 	}
 
 	public enum Colors {
-		Tryfle, Sassan, Gold, Steel, Emerald, Orange, Amethyst, Lily, PastelPink, Pink
+		Tryfle, Coral, Steel, Emerald, Amethyst, Lily, Venom, Pink
 	}
 }
