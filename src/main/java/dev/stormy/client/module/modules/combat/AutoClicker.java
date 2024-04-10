@@ -105,11 +105,11 @@ public class AutoClicker extends Module {
 
 	@SubscribeEvent
 	public void onRender(RenderHandEvent e) {
-		randomizer();
 		if (inventoryFill.isToggled() && (mc.currentScreen != null || !mc.inGameHasFocus)) {
 			doInvClick();
 			return;
 		}
+		randomizer();
 		if (PlayerUtils.isPlayerInGame() && Mouse.isButtonDown(0) && this.shouldClick && mc.currentScreen == null) {
 			if ((hitSelect.isToggled() && !hitSelectLogic()) || breakBlock()) {
 				return;
@@ -155,17 +155,15 @@ public class AutoClicker extends Module {
 	}
 
 	public void doInvClick() {
-		if ((mc.currentScreen instanceof net.minecraft.client.gui.inventory.GuiInventory || mc.currentScreen instanceof net.minecraft.client.gui.inventory.GuiChest) && (Keyboard.isKeyDown(54) || Keyboard.isKeyDown(42)) && Mouse.isButtonDown(0) && this.shouldClick) {
+		if ((mc.currentScreen instanceof net.minecraft.client.gui.inventory.GuiInventory || mc.currentScreen instanceof net.minecraft.client.gui.inventory.GuiChest) && (Keyboard.isKeyDown(54) || Keyboard.isKeyDown(42)) && Mouse.isButtonDown(0)) {
 			long currentTime = System.currentTimeMillis();
-			if (this.t.hasReached(Utils.Java.randomInt(5000.0D, 10000.0D))) {
-				this.delay = 1000 / (int) (leftCPS.getInput() + Utils.Java.randomInt(-4.0D, 0.0D));
+			// servers cant flag inv cps, but still reset dropping timer
+			// so that first click out of inv after 10s isnt always dropping
+			if (this.t.hasReached(Utils.Java.randomInt(5000.0D, 10000.0D)))
 				this.t.reset();
-			} else {
-				this.delay = 1000 / (int) (leftCPS.getInput() + Utils.Java.randomInt(-3.0D, 3.0D));
-			}
-			if (this.delay < 0) {
-				this.delay = 1000 / (int) (leftCPS.getInput() + Utils.Java.randomInt(0.0D, 3.0D));
-			}
+			this.delay = 1000 / (int) (leftCPS.getInput() + Utils.Java.randomInt(-1.0D, 5.0D));
+			if (this.delay < 0)
+				this.delay = 1000 / (int) (leftCPS.getInput() + Utils.Java.randomInt(2.0D, 5.0D));
 			if (currentTime - this.lastClickTime >= this.delay && !this.delaying) {
 				this.lastClickTime = currentTime;
 				try {
@@ -178,7 +176,6 @@ public class AutoClicker extends Module {
 			if (this.delaying && currentTime - this.lastClickTime >= Utils.Java.randomInt(30.0D, 120.0D)) {
 				this.lastClickTime = currentTime;
 				this.delaying = false;
-				this.shouldClick = false;
 			}
 		}
 	}

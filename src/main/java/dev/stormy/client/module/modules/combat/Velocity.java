@@ -4,15 +4,23 @@ import dev.stormy.client.module.Module;
 import dev.stormy.client.module.setting.impl.ComboSetting;
 import dev.stormy.client.module.setting.impl.SliderSetting;
 import me.tryfle.stormy.mixins.IS12PacketEntityVelocity;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.weavemc.loader.api.event.PacketEvent;
 import net.weavemc.loader.api.event.SubscribeEvent;
 
+import org.lwjgl.input.Keyboard;
+import java.util.Random;
+
 @SuppressWarnings("unused")
 public class Velocity extends Module {
 	public static SliderSetting horizontal, vertical, chance;
 	public static ComboSetting<velomode> velomodes;
+	public int key = mc.gameSettings.keyBindJump.getKeyCode();
+	public Random rand = new Random();
+
+
 
 	public Velocity() {
 		super("Velocity", Module.ModuleCategory.Combat, 0);
@@ -24,7 +32,7 @@ public class Velocity extends Module {
 
 	@SubscribeEvent
 	public void onPacket(me.tryfle.stormy.events.PacketEvent e) {
-		if (velomodes.getMode() == velomode.Cancel || mc.thePlayer == null || (velomodes.getMode() == velomode.Minemen && mc.thePlayer.onGround)) {
+		if (velomodes.getMode() == velomode.Cancel || mc.thePlayer == null || (velomodes.getMode() == velomode.Minemen && mc.thePlayer.onGround) || (velomodes.getMode() == velomode.JumpReset && (!mc.thePlayer.onGround || Keyboard.isKeyDown(key)))) {
 			return;
 		}
 		if (!e.isOutgoing()) {
@@ -48,6 +56,15 @@ public class Velocity extends Module {
 		if (velomodes.getMode() == velomode.Cancel) {
 			return;
 		}
+		//skidded from ravenweave tyty
+		if (velomodes.getMode() == velomode.JumpReset) {
+			KeyBinding.setKeyBindState(key, true);
+			KeyBinding.onTick(key);
+			javax.swing.Timer timer = new javax.swing.Timer(rand.nextInt(10, 20), actionevent -> KeyBinding.setKeyBindState(key, false));
+			timer.setRepeats(false);
+			timer.start();
+			return;
+		}
 		S12PacketEntityVelocity packet = (S12PacketEntityVelocity) e.getPacket();
 		IS12PacketEntityVelocity accessorPacket = (IS12PacketEntityVelocity) packet;
 		accessorPacket.setMotionX((int) (packet.getMotionX() * horizontal.getInput() / 100));
@@ -66,6 +83,6 @@ public class Velocity extends Module {
 	}
 
 	public enum velomode {
-		Normal, Cancel, Minemen
+		Normal, Cancel, Minemen, JumpReset
 	}
 }
