@@ -176,6 +176,7 @@ public class AutoClicker extends Module {
 			if (this.delaying && currentTime - this.lastClickTime >= Utils.Java.randomInt(30.0D, 120.0D)) {
 				this.lastClickTime = currentTime;
 				this.delaying = false;
+				this.shouldClick = false;
 			}
 		}
 	}
