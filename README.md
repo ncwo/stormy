@@ -3,6 +3,8 @@
 
 \+ Aded AccurateCps (https://github.com/Syz66/AccurateCPS/releases/tag/1.0)
 
+\+ Added JumpReset Velocity
+
 \+ Added Blink fake player
 
 \+ Added SumoFences (and fixed height on Fort Royale)
@@ -34,7 +36,7 @@
 
 \- Reach does not work with AutoClicker
 
-\- Allow unbinding of modules (esc?)
+\- Unbinding should be esc not 0
 
 \- BackTrack visualizer
 
