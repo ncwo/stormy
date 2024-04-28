@@ -161,9 +161,7 @@ public class AutoClicker extends Module {
 			// so that first click out of inv after 10s isnt always dropping
 			if (this.t.hasReached(Utils.Java.randomInt(5000.0D, 10000.0D)))
 				this.t.reset();
-			this.delay = 1000 / (int) (leftCPS.getInput() + Utils.Java.randomInt(-1.0D, 5.0D));
-			if (this.delay < 0)
-				this.delay = 1000 / (int) (leftCPS.getInput() + Utils.Java.randomInt(2.0D, 5.0D));
+			this.delay = 1000 / (int) (leftCPS.getInput() + Utils.Java.randomInt(0.0D, 6.0D));
 			if (currentTime - this.lastClickTime >= this.delay && !this.delaying) {
 				this.lastClickTime = currentTime;
 				try {
@@ -173,7 +171,7 @@ public class AutoClicker extends Module {
 				}
 				this.delaying = true;
 			}
-			if (this.delaying && currentTime - this.lastClickTime >= Utils.Java.randomInt(30.0D, 120.0D)) {
+			if (this.delaying && currentTime - this.lastClickTime >= Utils.Java.randomInt(10.0D, 100.0D)) {
 				this.lastClickTime = currentTime;
 				this.delaying = false;
 				this.shouldClick = false;

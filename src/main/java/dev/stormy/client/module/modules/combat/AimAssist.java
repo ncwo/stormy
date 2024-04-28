@@ -44,8 +44,8 @@ public class AimAssist extends Module {
 	public AimAssist() {
 		super("AimAssist", Module.ModuleCategory.Combat, 0);
 		registerSetting(new DescriptionSetting("Aims at enemies."));
-		registerSetting(speed = new SliderSetting("Speed", 80.0D, 1.0D, 100.0D, 1.0D));
-		registerSetting(fov = new SliderSetting("FOV", 90.0D, 15.0D, 180.0D, 1.0D));
+		registerSetting(speed = new SliderSetting("Speed", 15.0D, 1.0D, 100.0D, 1.0D));
+		registerSetting(fov = new SliderSetting("FOV", 30.0D, 15.0D, 180.0D, 1.0D));
 		registerSetting(distance = new SliderSetting("Distance", 4.5D, 1.0D, 10.0D, 0.5D));
 		registerSetting(clickAim = new TickSetting("Clicking only", true));
 		registerSetting(weaponOnly = new TickSetting("Weapon only", false));
