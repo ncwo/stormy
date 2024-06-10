@@ -24,15 +24,15 @@ public class Velocity extends Module {
 
 	public Velocity() {
 		super("Velocity", Module.ModuleCategory.Combat, 0);
-		this.registerSetting(horizontal = new SliderSetting("Horizontal", 90.0D, 0.0D, 100.0D, 1.0D));
+		this.registerSetting(horizontal = new SliderSetting("Horizontal", 100.0D, 0.0D, 100.0D, 1.0D));
 		this.registerSetting(vertical = new SliderSetting("Vertical", 100.0D, 0.0D, 100.0D, 1.0D));
 		this.registerSetting(chance = new SliderSetting("Chance", 100.0D, 0.0D, 100.0D, 1.0D));
-		this.registerSetting(velomodes = new ComboSetting<>("Mode", velomode.Normal));
+		this.registerSetting(velomodes = new ComboSetting<>("Mode", velomode.JumpReset));
 	}
 
 	@SubscribeEvent
 	public void onPacket(me.tryfle.stormy.events.PacketEvent e) {
-		if (velomodes.getMode() == velomode.Cancel || mc.thePlayer == null || (velomodes.getMode() == velomode.Minemen && mc.thePlayer.onGround) || (velomodes.getMode() == velomode.JumpReset && (!mc.thePlayer.onGround || Keyboard.isKeyDown(key)))) {
+		if (velomodes.getMode() == velomode.Cancel || mc.thePlayer == null || (velomodes.getMode() == velomode.JumpReset && (!mc.thePlayer.onGround || Keyboard.isKeyDown(key)))) {
 			return;
 		}
 		if (!e.isOutgoing()) {
@@ -57,7 +57,7 @@ public class Velocity extends Module {
 			return;
 		}
 		//skidded from ravenweave tyty
-		if (velomodes.getMode() == velomode.JumpReset) {
+		if (velomodes.getMode() == velomode.JumpReset || (velomodes.getMode() == velomode.Minemen && mc.thePlayer.onGround)) {
 			KeyBinding.setKeyBindState(key, true);
 			KeyBinding.onTick(key);
 			javax.swing.Timer timer = new javax.swing.Timer(rand.nextInt(10, 20), actionevent -> KeyBinding.setKeyBindState(key, false));

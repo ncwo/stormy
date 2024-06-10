@@ -1,3 +1,5 @@
+compatible with Weave 0.2.6
+
 ## Changes
 \+ Added Inventory Click to AutoClicker
 
@@ -41,3 +43,5 @@
 \- BackTrack visualizer
 
 \- DoubleSlider max values dont save/load properly
+
+\- Add NoFall / SilentAura

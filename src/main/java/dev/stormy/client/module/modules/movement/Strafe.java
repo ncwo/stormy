@@ -15,7 +15,7 @@ public class Strafe extends Module {
 		super("Strafe", ModuleCategory.Movement, 0);
 		registerSetting(new DescriptionSetting("Strafe"));
 		registerSetting(og = new TickSetting("Ground", true));
-		registerSetting(air = new TickSetting("Air", true));
+		registerSetting(air = new TickSetting("Air", false));
 	}
 
 	@SubscribeEvent

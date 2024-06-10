@@ -75,7 +75,7 @@ public class AimAssist extends Module {
 		if (en != null) {
 			double n = n(en);
 			if (n > 1.0D || n < -1.0D) {
-				double spd = (800L * (currentTime - this.lastTime)) / 1.0E9D / (101.0D - ThreadLocalRandom.current().nextDouble(speed.getInput() - 0.97388D, speed.getInput()));
+				double spd = (800L * (currentTime - this.lastTime)) / 1.0E9D / (101.0D - ThreadLocalRandom.current().nextDouble(speed.getInput() - 3.94172D, speed.getInput())); // og: 0.97388
 				float val = (float) (-n * ((speed.getInput() == 100.0D) ? 1.0D : spd));
 				mc.thePlayer.rotationYaw += val / 2.0F;
 			}

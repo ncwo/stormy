@@ -13,7 +13,6 @@ import dev.stormy.client.module.modules.combat.AutoClicker;
 import dev.stormy.client.module.modules.combat.Backtrack;
 import dev.stormy.client.module.modules.combat.ClickAssist;
 import dev.stormy.client.module.modules.combat.Criticals;
-import dev.stormy.client.module.modules.combat.Killaura;
 import dev.stormy.client.module.modules.combat.NoHitDelay;
 import dev.stormy.client.module.modules.combat.Reach;
 import dev.stormy.client.module.modules.combat.Velocity;
@@ -79,7 +78,6 @@ public class ModuleManager {
 		addModule(new Blink());
 		addModule(new NoRotate());
 		addModule(new Bhop());
-		addModule(new Killaura());
 		addModule(new AntiVoid());
 		addModule(new Sprint());
 		addModule(new Flight());
