@@ -31,6 +31,8 @@ import dev.stormy.client.module.modules.player.AutoPlace;
 import dev.stormy.client.module.modules.player.BedNuker;
 import dev.stormy.client.module.modules.player.Blink;
 import dev.stormy.client.module.modules.player.FastPlace;
+import dev.stormy.client.module.modules.player.Freecam;
+import dev.stormy.client.module.modules.player.GhostBlocks;
 import dev.stormy.client.module.modules.player.Manager;
 import dev.stormy.client.module.modules.player.NoRotate;
 import dev.stormy.client.module.modules.player.SafeWalk;
@@ -66,6 +68,8 @@ public class ModuleManager {
 		addModule(new AutoPlace());
 		addModule(new BedNuker());
 		addModule(new FastPlace());
+		addModule(new Freecam());
+		addModule(new GhostBlocks());
 		addModule(new SafeWalk());
 		addModule(new AntiBot());
 		addModule(new Chams());

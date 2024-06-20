@@ -65,9 +65,7 @@ public class AimAssist extends Module {
 
 	public void aim() {
 		long currentTime = System.nanoTime();
-		if (mc.thePlayer == null || mc.currentScreen != null || !mc.inGameHasFocus || (weaponOnly
-
-				.isToggled() && PlayerUtils.isPlayerHoldingWeapon()) || (breakBlocks.isToggled() && breakBlock()) || (clickAim.isToggled() && !Mouse.isButtonDown(0))) {
+		if (mc.thePlayer == null || mc.currentScreen != null || !mc.inGameHasFocus || (weaponOnly.isToggled() && PlayerUtils.isPlayerHoldingWeapon()) || (breakBlocks.isToggled() && breakBlock()) || (clickAim.isToggled() && !Mouse.isButtonDown(0))) {
 			this.lastTime = currentTime;
 			return;
 		}
